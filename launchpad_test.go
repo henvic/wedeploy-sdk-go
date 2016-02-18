@@ -21,13 +21,25 @@ var server *httptest.Server
 
 func TestAuthBasic(t *testing.T) {
 	r := URL("http://localhost/")
+	r.Auth("admin", "safe")
+
+	var want = "Basic YWRtaW46c2FmZQ==" // admin:safe in base64
+	var got = r.Headers.Get("Authorization")
+
+	if want != got {
+		t.Errorf("Wrong auth header. Expected %s, got %s instead", want, got)
+	}
+}
+
+func TestAuthBasicRequestParam(t *testing.T) {
+	r := URL("http://localhost/")
+	r.Auth("admin", "safe")
+
 	err := r.setupAction("GET")
 
 	if err != nil {
 		t.Error(err)
 	}
-
-	r.Auth("admin", "safe")
 
 	var username, password, ok = r.Request.BasicAuth()
 
@@ -39,11 +51,6 @@ func TestAuthBasic(t *testing.T) {
 func TestAuthOAuth(t *testing.T) {
 	var want = "Bearer myToken"
 	r := URL("http://localhost/")
-	err := r.setupAction("GET")
-
-	if err != nil {
-		t.Error(err)
-	}
 
 	r.Auth("myToken")
 	got := r.Headers.Get("Authorization")

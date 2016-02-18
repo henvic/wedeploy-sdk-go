@@ -2,6 +2,7 @@ package launchpad
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"io"
@@ -76,7 +77,7 @@ func (l *Launchpad) Auth(args ...string) *Launchpad {
 	case 1:
 		l.Header("Authorization", "Bearer "+args[0])
 	default:
-		l.Request.SetBasicAuth(args[0], args[1])
+		l.Header("Authorization", "Basic "+basicAuth(args[0], args[1]))
 	}
 	return l
 }
@@ -174,6 +175,13 @@ func (l *Launchpad) Put() error {
 func (l *Launchpad) Sort(field string, direction ...string) *Launchpad {
 	l.getOrCreateQuery().Sort(field, direction...)
 	return l
+}
+
+// basicAuth creates the basic auth parameter
+// extracted from golang/go/src/net/http/client.go
+func basicAuth(username, password string) string {
+	auth := username + ":" + password
+	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
 
 func (l *Launchpad) getOrCreateQuery() *query.Builder {
