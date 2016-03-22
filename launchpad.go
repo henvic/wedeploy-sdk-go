@@ -151,6 +151,33 @@ func (l *Launchpad) Offset(offset int) *Launchpad {
 	return l
 }
 
+// Param sets a query string param to the Request URL
+// Check TestParamParsingErrorSilentFailure if you find unexpected result
+func (l *Launchpad) Param(key, value string) *Launchpad {
+	var u, err = url.Parse(l.URL)
+
+	if err == nil {
+		var query = u.Query()
+		query.Set(key, value)
+		u.RawQuery = query.Encode()
+		l.URL = u.String()
+	}
+
+	return l
+}
+
+// Params gets the params from the Request URL
+// Check TestParamsParsingErrorSilentFailure if you find unexpected result
+func (l *Launchpad) Params() url.Values {
+	var u, err = url.Parse(l.URL)
+
+	if err == nil {
+		return u.Query()
+	}
+
+	return nil
+}
+
 // Patch method
 func (l *Launchpad) Patch() error {
 	return l.action("PATCH")

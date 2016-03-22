@@ -12,6 +12,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/kylelemons/godebug/pretty"
 	"github.com/launchpad-project/api.go/aggregation"
 	"github.com/launchpad-project/api.go/jsonlib"
 )
@@ -269,6 +270,80 @@ func TestURLErrorDueToInvalidURI(t *testing.T) {
 	}
 }
 
+func TestParam(t *testing.T) {
+	var req = URL("http://example.com/xyz?keep=this")
+
+	req.Param("x", "i")
+	req.Param("y", "j")
+	req.Param("z", "k")
+
+	var want = "http://example.com/xyz?keep=this&x=i&y=j&z=k"
+
+	if req.URL != want {
+		t.Errorf("Wanted url %v, got %v instead", want, req.URL)
+	}
+}
+
+func TestParamOverwrite(t *testing.T) {
+	var req = URL("http://example.com/xyz")
+
+	req.Param("foo", "bar")
+	req.Param("foo", "bar2")
+	req.Param("foo", "bar3")
+
+	var want = "http://example.com/xyz?foo=bar3"
+
+	if req.URL != want {
+		t.Errorf("Wanted url %v, got %v instead", want, req.URL)
+	}
+}
+
+func TestParamParsingErrorSilentFailure(t *testing.T) {
+	// Silently ignoring errors from parsing for now.
+	// This test describes what happens when parsing errors exists.
+	// Reason: API simplicity.
+
+	// Any error triggered here should be triggered as soon as a REST action
+	// such as Get() or Post() is called.
+	// Never even worry about it. Never say never.
+
+	// See also TestParamsParsingErrorSilentFailure
+
+	var req = URL(":wrong-schema")
+
+	req.Param("foo", "bar")
+
+	var want = ":wrong-schema"
+
+	if req.URL != want {
+		t.Errorf("Wanted invalid url %v, got %v instead", want, req.URL)
+	}
+}
+
+func TestParams(t *testing.T) {
+	var want = url.Values{
+		"q":    []string{"foo"},
+		"page": []string{"2"},
+	}
+
+	var req = URL("http://google.com/?q=foo&page=2")
+	var got = req.Params()
+
+	if !reflect.DeepEqual(want, got) {
+		t.Errorf("Params doesn't match:\n%s", pretty.Compare(want, got))
+	}
+}
+
+func TestParamsParsingErrorSilentFailure(t *testing.T) {
+	// See also TestParamParsingErrorSilentFailure
+	var req = URL(":wrong-schema")
+	var got = req.Params()
+
+	if got != nil {
+		t.Errorf("Params should be null, got %v instead", got)
+	}
+}
+
 func TestPatchRequest(t *testing.T) {
 	setupServer()
 	defer teardownServer()
@@ -355,6 +430,29 @@ func TestQueryNull(t *testing.T) {
 
 	if req.Query != nil {
 		t.Errorf("Expected empty query, found %v instead", req.Query)
+	}
+}
+
+func TestQueryString(t *testing.T) {
+	setupServer()
+	defer teardownServer()
+
+	var want = "http://example.com/url?foo=bar"
+
+	mux.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
+		var got = r.URL.String()
+		if got != want {
+			t.Errorf("Wanted URL %v, got %v instead", want, got)
+		}
+	})
+
+	req := URL("http://example.com/url")
+
+	req.Param("foo", "bar")
+	req.Param("foo", "bar")
+
+	if err := req.Get(); err != nil {
+		t.Error(err)
 	}
 }
 
