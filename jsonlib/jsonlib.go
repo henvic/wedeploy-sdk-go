@@ -2,6 +2,7 @@ package jsonlib
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -28,7 +29,19 @@ func AssertJSONMarshal(t *testing.T, want string, got interface{}) {
 	}
 
 	if !reflect.DeepEqual(wantJSON, gotMap) {
-		t.Errorf("JSON doesn't have the same structure:\n%s",
-			pretty.Compare(wantJSON, gotMap))
+		marshalError(t, wantJSON, gotMap)
 	}
+}
+
+func marshalError(t *testing.T, wantJSON, gotMap interface{}) {
+	var friendly string
+
+	switch wantJSON != nil && gotMap != nil {
+	case true:
+		friendly = pretty.Compare(wantJSON, gotMap)
+	default:
+		friendly = fmt.Sprintf("%v instead of %v", gotMap, wantJSON)
+	}
+
+	t.Errorf("Objects structure or content does not match:\n%s", friendly)
 }
