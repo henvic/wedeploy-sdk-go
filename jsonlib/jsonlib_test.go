@@ -27,6 +27,7 @@ var AssertJSONMarshalCases = []AssertJSONMarshalProvider{
 	{`["y", "z"]`, []string{"y", "z"}, true},
 	{`["y", "z"]`, map[string]string{"x": "y"}, false},
 	{`null`, map[string]string{"x": "y"}, false},
+	{`{4: "y"}`, map[int]string{4: "y"}, false},
 	{`{"x": "y"}`, xStruct{"y"}, true},
 	{`["y", "z"]`, []string{"x", "y", "z"}, false},
 }
