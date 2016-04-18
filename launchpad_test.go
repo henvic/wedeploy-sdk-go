@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"reflect"
 	"testing"
 
@@ -140,6 +141,43 @@ func TestRequestBodyBuffered(t *testing.T) {
 
 	if want != got {
 		t.Errorf("Wanted request body %v, got %v instead", want, got)
+	}
+}
+
+func TestBodyRequestReadCloser(t *testing.T) {
+	setupServer()
+	defer teardownServer()
+
+	var file, ferr = os.Open("LICENSE")
+
+	if ferr != nil {
+		panic(ferr)
+	}
+
+	mux.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
+		var a, er = ioutil.ReadAll(r.Body)
+		if er != nil {
+			t.Error(er)
+		}
+
+		file.Seek(0, 0)
+
+		var b, ef = ioutil.ReadFile("LICENSE")
+		if ef != nil {
+			t.Error(ef)
+		}
+
+		if bytes.Compare(a, b) != 0 {
+			t.Errorf("Expected file received to be equal sent file")
+		}
+	})
+
+	req := URL("http://example.com/url")
+
+	req.Body(file)
+
+	if err := req.Get(); err != nil {
+		t.Error(err)
 	}
 }
 
