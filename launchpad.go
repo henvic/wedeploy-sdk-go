@@ -232,7 +232,18 @@ func (l *Launchpad) action(method string) (err error) {
 		return err
 	}
 
+	var bb *bytes.Buffer
+
+	switch l.RequestBody.(type) {
+	case *bytes.Buffer:
+		bb = bytes.NewBuffer(l.RequestBody.(*bytes.Buffer).Bytes())
+	}
+
 	l.Response, err = l.httpClient.Do(l.Request)
+
+	if bb != nil {
+		l.RequestBody = bb
+	}
 
 	if err == nil && l.Response.StatusCode >= 400 {
 		err = ErrUnexpectedResponse
