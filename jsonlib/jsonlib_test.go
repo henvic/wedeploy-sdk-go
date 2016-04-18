@@ -1,9 +1,6 @@
 package jsonlib
 
-import (
-	"fmt"
-	"testing"
-)
+import "testing"
 
 type AssertJSONMarshalProvider struct {
 	Want string
@@ -39,7 +36,6 @@ func TestAssertJSONMarshal(t *testing.T) {
 
 		if mockTest.Failed() == c.Pass {
 			t.Errorf("Mock test did not meet passing status = %v assertion", c.Pass)
-			fmt.Println(c.Got)
 		}
 	}
 }
