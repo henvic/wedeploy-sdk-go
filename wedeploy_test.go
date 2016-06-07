@@ -1,4 +1,4 @@
-package launchpad
+package wedeploy
 
 import (
 	"bytes"
@@ -14,10 +14,10 @@ import (
 	"testing"
 
 	"github.com/kylelemons/godebug/pretty"
-	"github.com/launchpad-project/api.go/aggregation"
-	"github.com/launchpad-project/api.go/filter"
-	"github.com/launchpad-project/api.go/jsonlib"
-	"github.com/launchpad-project/api.go/query"
+	"github.com/wedeploy/api-go/aggregation"
+	"github.com/wedeploy/api-go/filter"
+	"github.com/wedeploy/api-go/jsonlib"
+	"github.com/wedeploy/api-go/query"
 )
 
 var mux *http.ServeMux
@@ -112,7 +112,7 @@ func TestBodyRequest(t *testing.T) {
 func TestRequestBodyBuffered(t *testing.T) {
 	// Buffered requested are removed by
 	// *http.Client.Do
-	// but we want launchpad.RequestBody to "persist"
+	// but we want wedeploy.RequestBody to "persist"
 	// so we can read it afterwards (for example, for verbose mode)
 	setupServer()
 	defer teardownServer()
@@ -316,7 +316,7 @@ func TestUserAgent(t *testing.T) {
 	}
 
 	var actual = r.Request.Header.Get("User-Agent")
-	var expected = "Launchpad/master (+https://launchpad.io)"
+	var expected = "WeDeploy/master (+https://wedeploy.com)"
 
 	if actual != expected {
 		t.Errorf("Expected User-Agent %s doesn't match with %s", actual, expected)

@@ -3,9 +3,9 @@ package query
 import (
 	"testing"
 
-	"github.com/launchpad-project/api.go/aggregation"
-	"github.com/launchpad-project/api.go/filter"
-	"github.com/launchpad-project/api.go/jsonlib"
+	"github.com/wedeploy/api-go/aggregation"
+	"github.com/wedeploy/api-go/filter"
+	"github.com/wedeploy/api-go/jsonlib"
 )
 
 func TestAggregate(t *testing.T) {

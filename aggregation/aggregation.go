@@ -1,6 +1,6 @@
 package aggregation
 
-import "github.com/launchpad-project/api.go/qrange"
+import "github.com/wedeploy/api-go/qrange"
 
 // Aggregation is a map with the aggregation data
 type Aggregation map[string]*data

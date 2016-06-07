@@ -1,8 +1,8 @@
 package query
 
 import (
-	"github.com/launchpad-project/api.go/aggregation"
-	"github.com/launchpad-project/api.go/filter"
+	"github.com/wedeploy/api-go/aggregation"
+	"github.com/wedeploy/api-go/filter"
 )
 
 // Builder is the query builder type

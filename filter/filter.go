@@ -1,8 +1,8 @@
 package filter
 
 import (
-	"github.com/launchpad-project/api.go/geo"
-	"github.com/launchpad-project/api.go/qrange"
+	"github.com/wedeploy/api-go/geo"
+	"github.com/wedeploy/api-go/qrange"
 )
 
 // Filter is a map with the filter data

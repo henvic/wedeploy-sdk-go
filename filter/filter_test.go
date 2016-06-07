@@ -3,9 +3,9 @@ package filter
 import (
 	"testing"
 
-	"github.com/launchpad-project/api.go/geo"
-	"github.com/launchpad-project/api.go/jsonlib"
-	"github.com/launchpad-project/api.go/qrange"
+	"github.com/wedeploy/api-go/geo"
+	"github.com/wedeploy/api-go/jsonlib"
+	"github.com/wedeploy/api-go/qrange"
 )
 
 func TestAny(t *testing.T) {

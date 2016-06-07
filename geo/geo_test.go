@@ -3,7 +3,7 @@ package geo
 import (
 	"testing"
 
-	"github.com/launchpad-project/api.go/jsonlib"
+	"github.com/wedeploy/api-go/jsonlib"
 )
 
 func TestBoundingBox(t *testing.T) {
