@@ -160,8 +160,6 @@ func TestBodyRequestReadCloser(t *testing.T) {
 			t.Error(er)
 		}
 
-		file.Seek(0, 0)
-
 		var b, ef = ioutil.ReadFile("LICENSE")
 		if ef != nil {
 			t.Error(ef)
