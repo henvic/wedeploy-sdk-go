@@ -7,6 +7,17 @@ go get -u github.com/wedeploy/api-go
 `
 
 ## Contributing
-In lieu of a formal style guide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Check your code with go fmt, go vet, go test, go cover, and go lint.
+You can get the latest api-go source code with `go get -u github.com/wedeploy/api-go`
 
-* [Lint for this repo](http://go-lint.appspot.com/github.com/wedeploy/api-go)
+In lieu of a formal style guide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Integration tests should be written as well.
+
+The master branch of this repository on GitHub is protected:
+* force-push is disabled
+* tests MUST pass on Travis before merging changes to master
+* branches MUST be up to date with master before merging
+
+Keep your commits neat. Try to always rebase your changes before publishing them.
+
+[goreportcard](https://goreportcard.com/report/github.com/wedeploy/api-go) can be used online or locally to detect defects and static analysis results from tools such as go vet, go lint, gocyclo, and more. Run [errcheck](https://github.com/kisielk/errcheck) to fix ignored error returns.
+
+Using go test and go cover are essential to make sure your code is covered with unit tests.
