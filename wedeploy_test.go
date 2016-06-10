@@ -148,7 +148,7 @@ func TestBodyRequestReadCloser(t *testing.T) {
 	setupServer()
 	defer teardownServer()
 
-	var file, ferr = os.Open("LICENSE")
+	var file, ferr = os.Open("LICENSE.md")
 
 	if ferr != nil {
 		panic(ferr)
@@ -160,7 +160,7 @@ func TestBodyRequestReadCloser(t *testing.T) {
 			t.Error(er)
 		}
 
-		var b, ef = ioutil.ReadFile("LICENSE")
+		var b, ef = ioutil.ReadFile("LICENSE.md")
 		if ef != nil {
 			t.Error(ef)
 		}
