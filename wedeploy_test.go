@@ -11,7 +11,9 @@ import (
 	"net/url"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/kylelemons/godebug/pretty"
 	"github.com/wedeploy/api-go/aggregation"
@@ -713,6 +715,57 @@ func TestQuerySortAndAggregate(t *testing.T) {
 
 	assertTextualBody(t, `"body"`, req.Response.Body)
 	assertMethod(t, "POST", req.Request.Method)
+}
+
+func TestTimeout(t *testing.T) {
+	var defaultTimeout = Client.Timeout
+	setupServer()
+	defer teardownServer()
+	defer func() {
+		Client.Timeout = defaultTimeout
+	}()
+
+	Client.Timeout = 10 * time.Second
+
+	mux.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(200 * time.Millisecond)
+		fmt.Fprintf(w, `"body"`)
+	})
+
+	req := URL("http://example.com/url")
+
+	if err := req.Post(); err != nil {
+		t.Error(err)
+	}
+
+	assertTextualBody(t, `"body"`, req.Response.Body)
+	assertMethod(t, "POST", req.Request.Method)
+}
+
+func TestTimeoutFailure(t *testing.T) {
+	var defaultTimeout = Client.Timeout
+	setupServer()
+	defer teardownServer()
+	defer func() {
+		Client.Timeout = defaultTimeout
+	}()
+
+	Client.Timeout = 350 * time.Millisecond
+
+	mux.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(time.Second)
+	})
+
+	req := URL("http://example.com/url")
+
+	switch err := req.Get(); err.(type) {
+	case *url.Error:
+		if !strings.Contains(err.Error(), "Client.Timeout") {
+			t.Errorf("Expected error due to client timeout, got %v instead", err)
+		}
+	default:
+		t.Errorf("Expected error to be due to timeout, got %v instead", err)
+	}
 }
 
 func assertBody(t *testing.T, want string, body io.ReadCloser) {
