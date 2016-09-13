@@ -15,9 +15,7 @@ import (
 
 	"github.com/kylelemons/godebug/pretty"
 	"github.com/wedeploy/api-go/aggregation"
-	"github.com/wedeploy/api-go/filter"
 	"github.com/wedeploy/api-go/jsonlib"
-	"github.com/wedeploy/api-go/query"
 )
 
 var mux *http.ServeMux
@@ -503,20 +501,6 @@ func TestQueryNull(t *testing.T) {
 
 	if req.Query != nil {
 		t.Errorf("Expected empty query, found %v instead", req.Query)
-	}
-}
-
-func TestQueryInvalidStructure(t *testing.T) {
-	req := URL("http://example.com/foo/bah")
-
-	req.Query = &query.Builder{
-		BFilter: &[]filter.Filter{
-			{"a": map[int]string{4: "x"}},
-		},
-	}
-
-	if err := req.setupAction("GET"); err == nil {
-		t.Error("Expected Get() to fail due to invalid Query structure")
 	}
 }
 
