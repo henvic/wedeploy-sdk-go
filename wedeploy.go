@@ -2,6 +2,7 @@ package wedeploy
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -44,6 +45,7 @@ type WeDeploy struct {
 	Request     *http.Request
 	Response    *http.Response
 	httpClient  *http.Client
+	timeout     *time.Duration
 }
 
 // URL creates a new request object
@@ -206,6 +208,11 @@ func (w *WeDeploy) Sort(field string, direction ...string) *WeDeploy {
 	return w
 }
 
+// Timeout for the request
+func (w *WeDeploy) Timeout(timeout time.Duration) {
+	w.timeout = &timeout
+}
+
 // basicAuth creates the basic auth parameter
 // extracted from golang/go/src/net/http/client.go
 func basicAuth(username, password string) string {
@@ -254,6 +261,19 @@ func (w *WeDeploy) action(method string) (err error) {
 	return err
 }
 
+func (w *WeDeploy) setupRequestTimeout() {
+	if w.timeout != nil {
+		ctx, cancel := context.WithCancel(context.TODO())
+		w.Request = w.Request.WithContext(ctx)
+
+		time.AfterFunc(*w.timeout, func() {
+			// this is always called, but it is fine
+			// as long as nothing else besides cancel is called here
+			cancel()
+		})
+	}
+}
+
 func (w *WeDeploy) setupAction(method string) (err error) {
 	if w.FormValues != nil {
 		w.RequestBody = strings.NewReader(w.FormValues.Encode())
@@ -278,6 +298,7 @@ func (w *WeDeploy) setupAction(method string) (err error) {
 
 	req.Header = w.Headers
 	w.Request = req
+	w.setupRequestTimeout()
 
 	return err
 }
