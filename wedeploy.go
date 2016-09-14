@@ -262,7 +262,7 @@ func (w *WeDeploy) action(method string) (err error) {
 }
 
 func (w *WeDeploy) setupRequestTimeout() {
-	if w.timeout != nil {
+	if w.timeout != nil && *w.timeout != 0*time.Second {
 		ctx, cancel := context.WithCancel(context.TODO())
 		w.Request = w.Request.WithContext(ctx)
 

@@ -190,6 +190,52 @@ func TestRequestBodyBufferedWithRequestHeaderWithTimeout(t *testing.T) {
 	}
 }
 
+func TestRequestBodyBufferedWithRequestHeaderWithTimeoutZero(t *testing.T) {
+	// Buffered requested are removed by
+	// *http.Client.Do
+	// but we want wedeploy.RequestBody to "persist"
+	// so we can read it afterwards (for example, for verbose mode)
+	setupServer()
+	defer teardownServer()
+
+	mux.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, `"body"`)
+
+		var want = "a-b-c"
+		var got = r.Header.Get("Foo-Bar")
+
+		if got != want {
+			t.Errorf("Expected header value %v not found, found %v instead", want, got)
+		}
+	})
+
+	req := URL("http://example.com/url")
+
+	req.Header("Foo-Bar", "a-b-c")
+
+	req.Timeout(0 * time.Second)
+
+	type Foo struct {
+		Bar string `json:"bar"`
+	}
+
+	var foo = &Foo{Bar: "one"}
+	var b, _ = json.Marshal(foo)
+
+	req.Body(bytes.NewBuffer(b))
+
+	if err := req.Get(); err != nil {
+		t.Error(err)
+	}
+
+	var want = `{"bar":"one"}`
+	var got = req.RequestBody.(*bytes.Buffer).String()
+
+	if want != got {
+		t.Errorf("Wanted request body %v, got %v instead", want, got)
+	}
+}
+
 func TestBodyRequestReadCloser(t *testing.T) {
 	setupServer()
 	defer teardownServer()
