@@ -26,9 +26,7 @@ const (
 
 var (
 	// Client is the HTTP Client to use with WeDeploy
-	Client = &http.Client{
-		Timeout: 60 * time.Second,
-	}
+	Client = &http.Client{}
 	// ErrUnexpectedResponse is used when an unexpected response happens
 	ErrUnexpectedResponse = errors.New("Unexpected response")
 )
