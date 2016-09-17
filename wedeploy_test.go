@@ -2,6 +2,7 @@ package wedeploy
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -352,6 +353,39 @@ func TestGetRequest(t *testing.T) {
 	assertMethod(t, "GET", req.Request.Method)
 }
 
+func TestGetRequestWithBackgroundContext(t *testing.T) {
+	setupServer()
+	defer teardownServer()
+	setupDefaultMux(`"body"`)
+
+	req := URL("http://example.com/url")
+	req.SetContext(context.Background())
+
+	if err := req.Get(); err != nil {
+		t.Error(err)
+	}
+
+	assertTextualBody(t, `"body"`, req.Response.Body)
+	assertMethod(t, "GET", req.Request.Method)
+}
+
+func TestGetRequestWithBackgroundContextAndTimeout(t *testing.T) {
+	setupServer()
+	defer teardownServer()
+	setupDefaultMux(`"body"`)
+
+	req := URL("http://example.com/url")
+	req.SetContext(context.Background())
+	req.Timeout(time.Second)
+
+	if err := req.Get(); err != nil {
+		t.Error(err)
+	}
+
+	assertTextualBody(t, `"body"`, req.Response.Body)
+	assertMethod(t, "GET", req.Request.Method)
+}
+
 func TestGetRequestTimedout(t *testing.T) {
 	setupServer()
 	defer teardownServer()
@@ -363,6 +397,57 @@ func TestGetRequestTimedout(t *testing.T) {
 
 	req := URL("http://example.com/url")
 	req.Timeout(350 * time.Millisecond)
+
+	switch err := req.Get(); err.(type) {
+	case *url.Error:
+		if !strings.Contains(err.Error(), "request canceled") {
+			t.Errorf("Expected error due to client timeout, got %v instead", err)
+		}
+	default:
+		t.Errorf("Expected error to be due to timeout, got %v instead", err)
+	}
+}
+
+func TestGetRequestWithContextTimedout(t *testing.T) {
+	setupServer()
+	defer teardownServer()
+
+	mux.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(800 * time.Millisecond)
+		fmt.Fprintf(w, `"body"`)
+	})
+
+	req := URL("http://example.com/url")
+	req.SetContext(context.Background())
+	req.Timeout(350 * time.Millisecond)
+
+	switch err := req.Get(); err.(type) {
+	case *url.Error:
+		if !strings.Contains(err.Error(), "request canceled") {
+			t.Errorf("Expected error due to client timeout, got %v instead", err)
+		}
+	default:
+		t.Errorf("Expected error to be due to timeout, got %v instead", err)
+	}
+}
+
+func TestGetRequestWithContextCanceledBeforeTimeout(t *testing.T) {
+	setupServer()
+	defer teardownServer()
+
+	mux.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(1 * time.Second)
+		fmt.Fprintf(w, `"body"`)
+	})
+
+	req := URL("http://example.com/url")
+	var cancelableCtx, cancel = context.WithCancel(context.TODO())
+	req.SetContext(cancelableCtx)
+	req.Timeout(350 * time.Millisecond)
+
+	time.AfterFunc(100*time.Millisecond, func() {
+		cancel()
+	})
 
 	switch err := req.Get(); err.(type) {
 	case *url.Error:

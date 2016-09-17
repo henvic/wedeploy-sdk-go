@@ -33,17 +33,19 @@ var (
 
 // WeDeploy is the structure for a WeDeploy query
 type WeDeploy struct {
-	ID          int
-	URL         string
-	Time        time.Time
-	Query       *query.Builder
-	FormValues  *url.Values
-	Headers     http.Header
-	RequestBody io.Reader
-	Request     *http.Request
-	Response    *http.Response
-	httpClient  *http.Client
-	timeout     *time.Duration
+	ID            int
+	URL           string
+	Time          time.Time
+	Query         *query.Builder
+	FormValues    *url.Values
+	Headers       http.Header
+	RequestBody   io.Reader
+	Request       *http.Request
+	Response      *http.Response
+	context       context.Context
+	cancelTimeout *context.CancelFunc
+	httpClient    *http.Client
+	timeout       *time.Duration
 }
 
 // URL creates a new request object
@@ -200,6 +202,10 @@ func (w *WeDeploy) Put() error {
 	return w.action("PUT")
 }
 
+func (w *WeDeploy) SetContext(ctx context.Context) {
+	w.context = ctx
+}
+
 // Sort adds a Sort query to the request
 func (w *WeDeploy) Sort(field string, direction ...string) *WeDeploy {
 	w.getOrCreateQuery().Sort(field, direction...)
@@ -236,6 +242,7 @@ func (w *WeDeploy) action(method string) (err error) {
 	err = w.setupAction(method)
 
 	if err != nil {
+		w.cancelRemainingTimeout()
 		return err
 	}
 
@@ -247,6 +254,7 @@ func (w *WeDeploy) action(method string) (err error) {
 	}
 
 	w.Response, err = w.httpClient.Do(w.Request)
+	w.cancelRemainingTimeout()
 
 	if bb != nil {
 		w.RequestBody = bb
@@ -259,16 +267,21 @@ func (w *WeDeploy) action(method string) (err error) {
 	return err
 }
 
+func (w *WeDeploy) setupContext() {
+	if w.context == nil {
+		w.context = context.Background()
+	}
+
+	w.Request = w.Request.WithContext(w.context)
+}
+
 func (w *WeDeploy) setupRequestTimeout() {
 	if w.timeout != nil && *w.timeout != 0*time.Second {
-		ctx, cancel := context.WithCancel(context.TODO())
-		w.Request = w.Request.WithContext(ctx)
-
-		time.AfterFunc(*w.timeout, func() {
-			// this is always called, but it is fine
-			// as long as nothing else besides cancel is called here
-			cancel()
-		})
+		requestCtx := w.Request.Context()
+		var c context.CancelFunc
+		w.context, c = context.WithTimeout(requestCtx, *w.timeout)
+		w.cancelTimeout = &c
+		w.Request = w.Request.WithContext(w.context)
 	}
 }
 
@@ -288,15 +301,19 @@ func (w *WeDeploy) setupAction(method string) (err error) {
 		w.RequestBody = bytes.NewReader(bin)
 	}
 
-	req, err := http.NewRequest(method, w.URL, w.RequestBody)
-
-	if err != nil {
+	if w.Request, err = http.NewRequest(method, w.URL, w.RequestBody); err != nil {
 		return err
 	}
 
-	req.Header = w.Headers
-	w.Request = req
+	w.setupContext()
 	w.setupRequestTimeout()
+	w.Request.Header = w.Headers
 
 	return err
+}
+
+func (w *WeDeploy) cancelRemainingTimeout() {
+	if w.cancelTimeout != nil {
+		(*w.cancelTimeout)()
+	}
 }
