@@ -202,6 +202,7 @@ func (w *WeDeploy) Put() error {
 	return w.action("PUT")
 }
 
+// SetContext for the request
 func (w *WeDeploy) SetContext(ctx context.Context) {
 	w.context = ctx
 }
