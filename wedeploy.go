@@ -277,7 +277,7 @@ func (w *WeDeploy) setupContext() {
 }
 
 func (w *WeDeploy) setupRequestTimeout() {
-	if w.timeout != nil && *w.timeout != 0*time.Second {
+	if w.timeout != nil && *w.timeout != time.Duration(0) {
 		requestCtx := w.Request.Context()
 		var c context.CancelFunc
 		w.context, c = context.WithTimeout(requestCtx, *w.timeout)
