@@ -11,25 +11,31 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/wedeploy/api-go/query"
 	"github.com/wedeploy/api-go/urilib"
 )
 
-const (
+var (
 	// Version of Go API Client for WeDeploy Project
 	Version = "master"
 	// UserAgent of the WeDeploy api-go client
 	UserAgent = "WeDeploy/" + Version + " (+https://wedeploy.com)"
-)
 
-var (
-	// Client is the HTTP Client to use with WeDeploy
-	Client = &http.Client{}
 	// ErrUnexpectedResponse is used when an unexpected response happens
 	ErrUnexpectedResponse = errors.New("Unexpected response")
+
+	client = &HTTPClient{
+		http: &http.Client{},
+	}
 )
+
+// Client used by default for requests
+func Client() *HTTPClient {
+	return client
+}
 
 // WeDeploy is the structure for a WeDeploy query
 type WeDeploy struct {
@@ -48,8 +54,36 @@ type WeDeploy struct {
 	timeout       *time.Duration
 }
 
+// HTTPClient of the library
+type HTTPClient struct {
+	http      *http.Client
+	httpMutex sync.RWMutex
+}
+
+// NewHTTPClient to use an alternative HTTP Client
+func NewHTTPClient() *HTTPClient {
+	return &HTTPClient{
+		http: &http.Client{},
+	}
+}
+
+// HTTP gets the HTTP client
+func (h *HTTPClient) HTTP() *http.Client {
+	h.httpMutex.RLock()
+	var httpc = h.http
+	h.httpMutex.RUnlock()
+	return httpc
+}
+
+// SetHTTP sets the default HTTP Client to use
+func (h *HTTPClient) SetHTTP(hc *http.Client) {
+	h.httpMutex.Lock()
+	h.http = hc
+	h.httpMutex.Unlock()
+}
+
 // URL creates a new request object
-func URL(uri string, paths ...string) *WeDeploy {
+func (h *HTTPClient) URL(uri string, paths ...string) *WeDeploy {
 	var time = time.Now()
 	rand.Seed(time.UTC().UnixNano())
 	uri = urilib.ResolvePath(uri, urilib.ResolvePath(paths...))
@@ -58,7 +92,7 @@ func URL(uri string, paths ...string) *WeDeploy {
 		ID:         rand.Int(),
 		Time:       time,
 		URL:        uri,
-		httpClient: Client,
+		httpClient: h.HTTP(),
 	}
 
 	w.Headers = http.Header{}
@@ -67,6 +101,11 @@ func URL(uri string, paths ...string) *WeDeploy {
 	w.Headers.Set("Content-Type", "application/json")
 
 	return w
+}
+
+// URL creates a new request object
+func URL(uri string, paths ...string) *WeDeploy {
+	return client.URL(uri, paths...)
 }
 
 // Aggregate adds an Aggregate query to the request

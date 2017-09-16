@@ -402,7 +402,7 @@ func TestGetRequestTimedout(t *testing.T) {
 
 	switch err := req.Get(); err.(type) {
 	case *url.Error:
-		if !strings.Contains(err.Error(), "request canceled") {
+		if !strings.Contains(err.Error(), "Get http://example.com/url: context deadline exceeded") {
 			t.Errorf("Expected error due to client timeout, got %v instead", err)
 		}
 	default:
@@ -425,7 +425,7 @@ func TestGetRequestWithContextTimedout(t *testing.T) {
 
 	switch err := req.Get(); err.(type) {
 	case *url.Error:
-		if !strings.Contains(err.Error(), "request canceled") {
+		if !strings.Contains(err.Error(), "Get http://example.com/url: context deadline exceeded") {
 			t.Errorf("Expected error due to client timeout, got %v instead", err)
 		}
 	default:
@@ -453,7 +453,7 @@ func TestGetRequestWithContextCanceledBeforeTimeout(t *testing.T) {
 
 	switch err := req.Get(); err.(type) {
 	case *url.Error:
-		if !strings.Contains(err.Error(), "request canceled") {
+		if !strings.Contains(err.Error(), "Get http://example.com/url: context canceled") {
 			t.Errorf("Expected error due to client timeout, got %v instead", err)
 		}
 	default:
@@ -935,14 +935,14 @@ func TestQuerySortAndAggregate(t *testing.T) {
 }
 
 func TestTimeout(t *testing.T) {
-	var defaultTimeout = Client.Timeout
+	var defaultTimeout = client.http.Timeout
 	setupServer()
 	defer teardownServer()
 	defer func() {
-		Client.Timeout = defaultTimeout
+		client.http.Timeout = defaultTimeout
 	}()
 
-	Client.Timeout = 10 * time.Second
+	client.http.Timeout = 10 * time.Second
 
 	mux.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(200 * time.Millisecond)
@@ -960,14 +960,14 @@ func TestTimeout(t *testing.T) {
 }
 
 func TestTimeoutFailure(t *testing.T) {
-	var defaultTimeout = Client.Timeout
+	var defaultTimeout = client.http.Timeout
 	setupServer()
 	defer teardownServer()
 	defer func() {
-		Client.Timeout = defaultTimeout
+		client.http.Timeout = defaultTimeout
 	}()
 
-	Client.Timeout = 350 * time.Millisecond
+	client.http.Timeout = 350 * time.Millisecond
 
 	mux.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(time.Second)
@@ -982,6 +982,65 @@ func TestTimeoutFailure(t *testing.T) {
 		}
 	default:
 		t.Errorf("Expected error to be due to timeout, got %v instead", err)
+	}
+}
+
+func TestAlternative(t *testing.T) {
+	setupServer()
+	defer teardownServer()
+
+	// change the client to force an error, if this fails
+	Client().SetHTTP(&http.Client{})
+
+	wantContentType := "text/plain"
+	mux.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, `"body"`)
+
+		gotContentType := r.Header.Get("Content-Type")
+		assertTextualBody(t, "foo", r.Body)
+
+		if gotContentType != wantContentType {
+			t.Errorf("Expected content type %s, got %s instead",
+				wantContentType,
+				gotContentType)
+		}
+	})
+
+	hc := NewHTTPClient()
+	transport := &http.Transport{
+		Proxy: func(req *http.Request) (*url.URL, error) {
+			return url.Parse(server.URL)
+		},
+	}
+
+	hc.SetHTTP(&http.Client{
+		Transport: transport,
+	})
+
+	req := hc.URL("http://example.com/url")
+
+	req.Headers.Set("Content-Type", wantContentType)
+	req.Body(bytes.NewBufferString("foo"))
+
+	if err := req.Post(); err != nil {
+		t.Error(err)
+	}
+
+	assertTextualBody(t, `"body"`, req.Response.Body)
+	assertMethod(t, "POST", req.Request.Method)
+}
+
+// func TestConcurrency(t *testing.T) {
+// 	go func() {
+// 		Client = nil
+// 	}()
+
+// 	Client = nil
+// }
+
+func TestClient(t *testing.T) {
+	if Client() != client {
+		t.Errorf("Client auxiliary method is not returning client correctly")
 	}
 }
 
@@ -1049,10 +1108,11 @@ func setupServer() {
 			return url.Parse(server.URL)
 		},
 	}
-	Client = &http.Client{Transport: transport}
+
+	client.SetHTTP(&http.Client{Transport: transport})
 }
 
 func teardownServer() {
-	Client = &http.Client{}
+	client.SetHTTP(&http.Client{})
 	server.Close()
 }
