@@ -1,4 +1,4 @@
-# Software License Agreement (BSD License)
+# BSD 3-clause "New" or "Revised" License
 
 Copyright (c) 2016-present, Liferay Inc.
 All rights reserved.
