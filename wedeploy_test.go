@@ -545,7 +545,7 @@ func TestUserAgent(t *testing.T) {
 	}
 
 	var actual = r.Request.Header.Get("User-Agent")
-	var expected = "WeDeploy/master (+https://wedeploy.com)"
+	var expected = fmt.Sprintf("WeDeploy/%s (+https://wedeploy.com)", Version)
 
 	if actual != expected {
 		t.Errorf("Expected User-Agent %s doesn't match with %s", actual, expected)
