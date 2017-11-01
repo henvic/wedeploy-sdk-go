@@ -47,10 +47,10 @@ import (
 	"time"
 
 	"github.com/kylelemons/godebug/pretty"
-	"github.com/wedeploy/api-go/aggregation"
-	"github.com/wedeploy/api-go/filter"
-	"github.com/wedeploy/api-go/jsonlib"
-	"github.com/wedeploy/api-go/query"
+	"github.com/wedeploy/wedeploy-sdk-go/aggregation"
+	"github.com/wedeploy/wedeploy-sdk-go/filter"
+	"github.com/wedeploy/wedeploy-sdk-go/jsonlib"
+	"github.com/wedeploy/wedeploy-sdk-go/query"
 )
 
 var mux *http.ServeMux

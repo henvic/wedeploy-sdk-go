@@ -33,7 +33,7 @@ package qrange
 import (
 	"testing"
 
-	"github.com/wedeploy/api-go/jsonlib"
+	"github.com/wedeploy/wedeploy-sdk-go/jsonlib"
 )
 
 func TestFromTo(t *testing.T) {

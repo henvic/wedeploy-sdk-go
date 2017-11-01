@@ -31,8 +31,8 @@ POSSIBILITY OF SUCH DAMAGE.
 package query
 
 import (
-	"github.com/wedeploy/api-go/aggregation"
-	"github.com/wedeploy/api-go/filter"
+	"github.com/wedeploy/wedeploy-sdk-go/aggregation"
+	"github.com/wedeploy/wedeploy-sdk-go/filter"
 )
 
 // Builder is the query builder type

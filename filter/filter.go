@@ -31,8 +31,8 @@ POSSIBILITY OF SUCH DAMAGE.
 package filter
 
 import (
-	"github.com/wedeploy/api-go/geo"
-	"github.com/wedeploy/api-go/qrange"
+	"github.com/wedeploy/wedeploy-sdk-go/geo"
+	"github.com/wedeploy/wedeploy-sdk-go/qrange"
 )
 
 // Filter is a map with the filter data

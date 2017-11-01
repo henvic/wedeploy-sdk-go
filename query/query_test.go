@@ -33,9 +33,9 @@ package query
 import (
 	"testing"
 
-	"github.com/wedeploy/api-go/aggregation"
-	"github.com/wedeploy/api-go/filter"
-	"github.com/wedeploy/api-go/jsonlib"
+	"github.com/wedeploy/wedeploy-sdk-go/aggregation"
+	"github.com/wedeploy/wedeploy-sdk-go/filter"
+	"github.com/wedeploy/wedeploy-sdk-go/jsonlib"
 )
 
 func TestAggregate(t *testing.T) {

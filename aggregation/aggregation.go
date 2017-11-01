@@ -30,7 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package aggregation
 
-import "github.com/wedeploy/api-go/qrange"
+import "github.com/wedeploy/wedeploy-sdk-go/qrange"
 
 // Aggregation is a map with the aggregation data
 type Aggregation map[string]*data

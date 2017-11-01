@@ -44,14 +44,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/wedeploy/api-go/query"
-	"github.com/wedeploy/api-go/urilib"
+	"github.com/wedeploy/wedeploy-sdk-go/query"
+	"github.com/wedeploy/wedeploy-sdk-go/urilib"
 )
 
 var (
 	// Version of Go API Client for WeDeploy Project
 	Version = "master"
-	// UserAgent of the WeDeploy api-go client
+	// UserAgent of the WeDeploy wedeploy-sdk-go client
 	UserAgent = "WeDeploy/" + Version + " (+https://wedeploy.com)"
 
 	// ErrUnexpectedResponse is used when an unexpected response happens

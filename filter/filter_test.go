@@ -33,9 +33,9 @@ package filter
 import (
 	"testing"
 
-	"github.com/wedeploy/api-go/geo"
-	"github.com/wedeploy/api-go/jsonlib"
-	"github.com/wedeploy/api-go/qrange"
+	"github.com/wedeploy/wedeploy-sdk-go/geo"
+	"github.com/wedeploy/wedeploy-sdk-go/jsonlib"
+	"github.com/wedeploy/wedeploy-sdk-go/qrange"
 )
 
 func TestAny(t *testing.T) {
