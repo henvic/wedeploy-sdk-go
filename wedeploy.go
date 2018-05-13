@@ -250,6 +250,11 @@ func (w *WeDeploy) SetContext(ctx context.Context) {
 	w.context = ctx
 }
 
+// Context gets the existing request context
+func (w *WeDeploy) Context() context.Context {
+	return w.context
+}
+
 // Sort adds a Sort query to the request
 func (w *WeDeploy) Sort(field string, direction ...string) *WeDeploy {
 	w.getOrCreateQuery().Sort(field, direction...)

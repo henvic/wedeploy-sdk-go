@@ -85,6 +85,30 @@ func TestHeader(t *testing.T) {
 
 }
 
+func TestContext(t *testing.T) {
+	req := URL("https://example.com/")
+
+	s := struct{}{}
+	ctx := context.WithValue(context.Background(), s, "cool")
+	req.SetContext(ctx)
+
+	got := req.Context()
+
+	if got != ctx {
+		t.Errorf("Expected context to be %v, got %v instead", ctx, got)
+	}
+}
+
+func TestNoContext(t *testing.T) {
+	req := URL("https://example.com/")
+
+	got := req.Context()
+
+	if got != nil {
+		t.Errorf("Expected no context set, got %v instead", got)
+	}
+}
+
 func TestBodyRequest(t *testing.T) {
 	setupServer()
 	defer teardownServer()
