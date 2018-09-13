@@ -340,14 +340,8 @@ func (w *WeDeploy) setupAction(method string) (err error) {
 		w.Headers.Set("Content-Type", "application/x-www-form-urlencoded")
 	}
 
-	if w.Query != nil {
-		bin, err := json.Marshal(w.Query)
-
-		if err != nil {
-			return err
-		}
-
-		w.RequestBody = bytes.NewReader(bin)
+	if err = w.setupQuery(); err != nil {
+		return err
 	}
 
 	if w.Request, err = http.NewRequest(method, w.URL, w.RequestBody); err != nil {
@@ -359,6 +353,22 @@ func (w *WeDeploy) setupAction(method string) (err error) {
 	w.Request.Header = w.Headers
 
 	return err
+}
+
+func (w *WeDeploy) setupQuery() error {
+	if w.Query == nil {
+		return nil
+	}
+
+	var bin []byte
+	bin, err := json.Marshal(w.Query)
+
+	if err != nil {
+		return err
+	}
+
+	w.RequestBody = bytes.NewReader(bin)
+	return nil
 }
 
 func (w *WeDeploy) cancelRemainingTimeout() {
