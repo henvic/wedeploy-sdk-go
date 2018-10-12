@@ -9,7 +9,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
@@ -28,13 +28,19 @@ var (
 	// UserAgent of the WeDeploy wedeploy-sdk-go client
 	UserAgent = "WeDeploy/" + Version + " (+https://wedeploy.com)"
 
-	// ErrUnexpectedResponse is used when an unexpected response happens
-	ErrUnexpectedResponse = errors.New("Unexpected response")
-
 	client = &HTTPClient{
 		http: &http.Client{},
 	}
 )
+
+// StatusError is used for HTTP status code >= 400
+type StatusError struct {
+	Code int
+}
+
+func (s StatusError) Error() string {
+	return fmt.Sprintf("%d %s", s.Code, http.StatusText(s.Code))
+}
 
 // Client used by default for requests
 func Client() *HTTPClient {
@@ -311,7 +317,7 @@ func (w *WeDeploy) action(method string) (err error) {
 	}
 
 	if err == nil && w.Response.StatusCode >= 400 {
-		err = ErrUnexpectedResponse
+		err = StatusError{w.Response.StatusCode}
 	}
 
 	return err
@@ -341,8 +347,14 @@ func (w *WeDeploy) setupAction(method string) (err error) {
 		w.Headers.Set("Content-Type", "application/x-www-form-urlencoded")
 	}
 
-	if err = w.setupQuery(); err != nil {
-		return err
+	if w.Query != nil {
+		bin, err := json.Marshal(w.Query)
+
+		if err != nil {
+			return err
+		}
+
+		w.RequestBody = bytes.NewReader(bin)
 	}
 
 	if w.Request, err = http.NewRequest(method, w.URL, w.RequestBody); err != nil {
@@ -354,22 +366,6 @@ func (w *WeDeploy) setupAction(method string) (err error) {
 	w.Request.Header = w.Headers
 
 	return err
-}
-
-func (w *WeDeploy) setupQuery() error {
-	if w.Query == nil {
-		return nil
-	}
-
-	var bin []byte
-	bin, err := json.Marshal(w.Query)
-
-	if err != nil {
-		return err
-	}
-
-	w.RequestBody = bytes.NewReader(bin)
-	return nil
 }
 
 func (w *WeDeploy) cancelRemainingTimeout() {
