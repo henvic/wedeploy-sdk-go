@@ -149,7 +149,17 @@ func (w *WeDeploy) Count() *WeDeploy {
 }
 
 // DecodeJSON decodes a JSON response
-func (w *WeDeploy) DecodeJSON(class interface{}) error {
+func (w *WeDeploy) DecodeJSON(class interface{}) (err error) {
+	defer func() {
+		if w.Response != nil {
+			ec := w.Response.Body.Close()
+
+			if err == nil {
+				err = ec
+			}
+		}
+	}()
+
 	return json.NewDecoder(w.Response.Body).Decode(class)
 }
 
