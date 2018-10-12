@@ -102,7 +102,8 @@ func (h *HTTPClient) URL(uri string, paths ...string) *WeDeploy {
 	w.Headers = http.Header{}
 
 	w.Headers.Set("User-Agent", UserAgent)
-	w.Headers.Set("Content-Type", "application/json")
+	w.Headers.Set("Content-Type", "application/json; charset=utf-8")
+	w.Headers.Set("Accept", "application/json")
 
 	return w
 }
