@@ -7,7 +7,7 @@ package geo
 import (
 	"testing"
 
-	"github.com/wedeploy/wedeploy-sdk-go/jsonlib"
+	"github.com/henvic/wedeploy-sdk-go/jsonlib"
 )
 
 func TestBoundingBox(t *testing.T) {

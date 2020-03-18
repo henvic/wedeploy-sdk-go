@@ -7,9 +7,9 @@ package aggregation
 import (
 	"testing"
 
-	"github.com/wedeploy/wedeploy-sdk-go/geo"
-	"github.com/wedeploy/wedeploy-sdk-go/jsonlib"
-	"github.com/wedeploy/wedeploy-sdk-go/qrange"
+	"github.com/henvic/wedeploy-sdk-go/geo"
+	"github.com/henvic/wedeploy-sdk-go/jsonlib"
+	"github.com/henvic/wedeploy-sdk-go/qrange"
 )
 
 func TestAverage(t *testing.T) {

@@ -7,9 +7,9 @@ package query
 import (
 	"testing"
 
-	"github.com/wedeploy/wedeploy-sdk-go/aggregation"
-	"github.com/wedeploy/wedeploy-sdk-go/filter"
-	"github.com/wedeploy/wedeploy-sdk-go/jsonlib"
+	"github.com/henvic/wedeploy-sdk-go/aggregation"
+	"github.com/henvic/wedeploy-sdk-go/filter"
+	"github.com/henvic/wedeploy-sdk-go/jsonlib"
 )
 
 func TestAggregate(t *testing.T) {

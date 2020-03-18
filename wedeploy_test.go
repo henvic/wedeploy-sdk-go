@@ -20,11 +20,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/henvic/wedeploy-sdk-go/aggregation"
+	"github.com/henvic/wedeploy-sdk-go/filter"
+	"github.com/henvic/wedeploy-sdk-go/jsonlib"
+	"github.com/henvic/wedeploy-sdk-go/query"
 	"github.com/kylelemons/godebug/pretty"
-	"github.com/wedeploy/wedeploy-sdk-go/aggregation"
-	"github.com/wedeploy/wedeploy-sdk-go/filter"
-	"github.com/wedeploy/wedeploy-sdk-go/jsonlib"
-	"github.com/wedeploy/wedeploy-sdk-go/query"
 )
 
 var mux *http.ServeMux

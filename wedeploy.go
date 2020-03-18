@@ -18,8 +18,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/wedeploy/wedeploy-sdk-go/query"
-	"github.com/wedeploy/wedeploy-sdk-go/urilib"
+	"github.com/henvic/wedeploy-sdk-go/query"
+	"github.com/henvic/wedeploy-sdk-go/urilib"
 )
 
 var (
